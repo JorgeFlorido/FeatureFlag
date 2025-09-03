@@ -13,14 +13,12 @@ namespace FeatureFlag
       _flags = new ConcurrentDictionary<string, bool>(initialFlags);
     }
 
-    public bool IsEnabled(string flagName)
-    {
-      return _flags.TryGetValue(flagName, out var value) && value;
-    }
-
     public Task<bool> IsEnabledAsync(string flagName, CancellationToken cancellationToken = default)
     {
-      return Task.FromResult(IsEnabled(flagName));
+      if (string.IsNullOrWhiteSpace(flagName))
+        throw new ArgumentException("Flag name must not be null or empty.", nameof(flagName));
+
+      return Task.FromResult(_flags.TryGetValue(flagName, out var value) && value);
     }
   }
 }

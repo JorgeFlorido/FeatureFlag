@@ -1,6 +1,6 @@
 ﻿namespace FeatureFlag
 {
-  public class FeatureFlagsOptions : Dictionary<string, bool> { }
+  public class FeatureFlagsOptions : Dictionary<string, bool>
   {
   }
 }

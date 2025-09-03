@@ -11,8 +11,5 @@ namespace FeatureFlag
 
     public Task<bool> IsEnabledAsync(string flagName, CancellationToken ct = default)
         => _provider.IsEnabledAsync(flagName, ct);
-
-    public bool IsEnabled(string flagName)
-        => IsEnabledAsync(flagName).ConfigureAwait(false).GetAwaiter().GetResult(); // isolated
   }
 }
