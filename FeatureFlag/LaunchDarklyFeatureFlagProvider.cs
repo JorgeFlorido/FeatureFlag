@@ -4,21 +4,32 @@ using LaunchDarkly.Sdk.Server;
 
 namespace FeatureFlag
 {
-  public sealed class LaunchDarklyFeatureFlagProvider : IFeatureFlagProvider, IDisposable
+  public sealed class LaunchDarklyFeatureFlagProvider : IFeatureFlagProvider, IAsyncDisposable
   {
     private readonly LdClient _client;
 
     public LaunchDarklyFeatureFlagProvider(string sdkKey)
     {
+      if (string.IsNullOrWhiteSpace(sdkKey))
+        throw new ArgumentException("LaunchDarkly SDK key must not be null or empty.", nameof(sdkKey));
+
       _client = new LdClient(sdkKey);
     }
 
-    public bool IsEnabled(string flagName) =>
-        _client.BoolVariation(flagName, Context.New("system"), false);
+    public Task<bool> IsEnabledAsync(string flagName, CancellationToken cancellationToken = default)
+    {
+      if (string.IsNullOrWhiteSpace(flagName))
+        throw new ArgumentException("Flag name must not be null or empty.", nameof(flagName));
 
-    public Task<bool> IsEnabledAsync(string flagName, CancellationToken ct = default) =>
-        Task.FromResult(IsEnabled(flagName));
+      var context = Context.Builder("system-user").Build();
+      var result = _client.BoolVariation(flagName, context, false);
+      return Task.FromResult(result);
+    }
 
-    public void Dispose() => _client.Dispose();
+    public ValueTask DisposeAsync()
+    {
+      _client.Dispose();
+      return ValueTask.CompletedTask;
+    }
   }
 }
